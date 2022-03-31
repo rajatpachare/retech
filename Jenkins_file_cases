@@ -31,6 +31,13 @@ node {
         stage('Step1') {
         if (reg == 'Dev') {
             echo 'New release on dev server'
+            stage ('depoly')
+            {
+        
+            sh 'ssh -o StrictHostKeyChecking=no root@43.204.35.79 /root/kubernets/kube.sh'
+            sh 'docker rmi 255645000496.dkr.ecr.ap-south-1.amazonaws.com/kube kube'    
+            }
+            
         } 
         
         if (reg == 'Prod') {

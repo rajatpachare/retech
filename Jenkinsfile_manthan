@@ -1,0 +1,33 @@
+node {
+    //Git Checkout and pull
+    stage ('Git Checkout and pull') 
+    {
+    
+    git credentialsId: 'manthan', url: 'https://git.choicetechlab.com/middleware/middleware-api.git' 
+    //git 'https://git.choicetechlab.com/middleware/middleware-api.git'
+    sh 'ls -ltrh'
+    
+    }
+    //Logging into AWS ECR
+    stage('Logging into AWS ECR') {
+
+    sh """aws ecr get-login-password --region 'ap-south-1' | docker login --username AWS --password-stdin ${REPOSITORY_URL}"""
+    }
+    //Building Image
+    stage('Building Image') {
+
+    sh "docker build -t test_image ."
+    }
+    //Tag and Push
+    stage('Tag and Push') {
+
+    sh "docker tag test_image:latest ${REPOSITORY_URL}:test_image_V1"
+    sh "docker push ${REPOSITORY_URL}:test_image_V1"
+    }
+    //LOGIN AND RUN
+    stage('LOGIN AND RUN') {
+    sh "echo REPOSITORY_URL = ${REPOSITORY_URL}"
+    sh "chmod +x server.sh"
+    sh "./server.sh ${SSH_PASSWORD} ${REPOSITORY_URL} ${SERVER_IP}"
+    }
+}
